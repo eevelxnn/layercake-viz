@@ -9,6 +9,7 @@
     forceCenter
   } from 'd3-force';
   import { scaleSqrt } from 'd3-scale';
+  import { format } from 'd3-format';
 
   const { data, width, height } = getContext('LayerCake');
 
@@ -20,6 +21,7 @@
 
   const maxValue = 5000;
   const rScale = scaleSqrt().domain([0, maxValue]).range([10, 80]);
+  const formatBillion = format(',.2f');
 
   const getColor = d => d.self_made ? '#69b3a2' : '#ccc';
 
@@ -32,6 +34,15 @@
     return Math.max(min, Math.min(max, value));
   }
 
+  let tooltip = null;
+  let tooltipX = 0;
+  let tooltipY = 0;
+
+  function handleMouseMove(event) {
+    tooltipX = event.clientX + 12;
+    tooltipY = event.clientY + 12;
+  }
+
   $: if ($data.length) {
     const nextNodes = $data.map(d => {
       const existing = findExistingNode(d[idKey]);
@@ -42,7 +53,7 @@
         : {
             ...d,
             x: Math.random() * $width,
-            y: $height + 100, // animate from below
+            y: $height + 100,
             r
           };
     });
@@ -51,11 +62,11 @@
 
     simulation = forceSimulation(nextNodes)
       .force('x', forceX($width / 2).strength(0.1))
-      .force('y', forceY($height / 2).strength(0.1))
+      .force('y', forceY($height / 2).strength(0.15))
       .force('center', forceCenter($width / 2, $height / 2))
       .force('charge', forceManyBody().strength(manyBodyStrength))
       .force('collision', forceCollide().radius(d => d.r + nodeStrokeWidth / 2).strength(1))
-      .alpha(1)
+      .alpha(0.2)
       .restart();
 
     simulation.on('tick', () => {
@@ -68,28 +79,45 @@
   }
 </script>
 
-<svg {width} {height}>
-  {#each nodes as d, i (d[idKey] + '-' + d[valueKey])}
-    <g transform={`translate(${d.x}, ${d.y})`}>
-      <circle
-        r={rScale(d[valueKey])}
-        fill={getColor(d)}
-        stroke={nodeStroke}
-        stroke-width={nodeStrokeWidth}
-      />
-      {#if rScale(d[valueKey]) > 25}
-        <text
-          text-anchor="middle"
-          dy=".3em"
-          font-size="10"
-          fill="#333"
-        >
-          {d[idKey]}
-        </text>
-      {/if}
-    </g>
-  {/each}
-</svg>
+<div on:mousemove={handleMouseMove} style="position: relative;">
+  <svg {width} {height}>
+    {#each nodes as d (d[idKey])}
+      <g
+        transform={`translate(${d.x}, ${d.y})`}
+        on:mouseenter={() => (tooltip = d)}
+        on:mouseleave={() => (tooltip = null)}
+      >
+        <circle
+          r={rScale(d[valueKey])}
+          fill={getColor(d)}
+          stroke={nodeStroke}
+          stroke-width={nodeStrokeWidth}
+        />
+        {#if rScale(d[valueKey]) > 25}
+          <text
+            text-anchor="middle"
+            dy=".3em"
+            font-size="10"
+            fill="#333"
+          >
+            {d[idKey]}
+          </text>
+        {/if}
+      </g>
+    {/each}
+  </svg>
+
+  {#if tooltip}
+    <div
+      class="tooltip"
+      style="top: {tooltipY}px; left: {tooltipX}px;"
+    >
+      <strong>{tooltip[idKey]}</strong><br />
+      Net Worth: ${formatBillion(tooltip[valueKey])}B<br />
+      {tooltip.self_made ? "Self-Made" : "Inherited"}
+    </div>
+  {/if}
+</div>
 
 <style>
   svg {
@@ -97,5 +125,19 @@
     height: 100%;
     display: block;
     overflow: visible;
+  }
+
+  .tooltip {
+    position: fixed;
+    background: white;
+    color: black;
+    padding: 6px 10px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    max-width: 200px;
   }
 </style>
