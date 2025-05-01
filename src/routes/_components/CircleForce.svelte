@@ -23,7 +23,7 @@
   const rScale = scaleSqrt().domain([0, maxValue]).range([5, 80]);
   const formatBillion = format(',.2f');
 
-  const getColor = d => d.self_made ? '#69b3a2' : '#ccc';
+  const getColor = d => d.self_made ? '#9b59b6' : '#d3d3d3';
 
   let nodes = [];
   let simulation;
@@ -82,8 +82,7 @@
 
 <div on:mousemove={handleMouseMove} style="position: relative;">
   <svg {width} {height}>
-    {#each nodes as d (d[idKey])}
-      <g
+{#each nodes as d (d.key)}      <g
         transform={`translate(${d.x}, ${d.y})`}
         on:mouseenter={() => {
           tooltip = d;

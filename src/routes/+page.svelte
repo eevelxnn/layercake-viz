@@ -5,7 +5,7 @@
   import { format } from 'd3-format';
 
 let width = 3000;
-let height = 900;
+let height = 3300;
 
   const years = Array.from(new Set(raw.map(d => d.year))).sort();
   const formatNumber = format(',d');
@@ -17,11 +17,12 @@ let height = 900;
 
   $: data = raw
     .filter(d => d.year === year && d.avg_net_worth > 0)
-    .map(d => ({
-      id: d.full_name,
-      value: d.avg_net_worth,
-      self_made: d.self_made
-    }));
+.map((d, i) => ({
+  id: d.full_name,           // 👈 shown in UI
+  key: `${d.full_name}-${i}`,// 👈 internal unique key
+  value: d.avg_net_worth,
+  self_made: d.self_made
+}))
 
   $: {
     stats.total = data.length;
@@ -155,11 +156,11 @@ let height = 900;
   }
 
   .stat-box.self-made {
-    border-top-color: #27ae60;
+    border-top-color: #9b59b6;
   }
 
   .stat-box.inherited {
-    border-top-color: #e74c3c;
+    border-top-color: #d3d3d3;
   }
 
   .stat-value {
@@ -267,11 +268,11 @@ let height = 900;
   }
 
   .self-made-color {
-    background-color: #27ae60;
+    background-color: #9b59b6;
   }
 
   .inherited-color {
-    background-color: #e74c3c;
+    background-color: #d3d3d3;
   }
 
   .legend-note {
@@ -281,13 +282,15 @@ let height = 900;
     font-size: 0.9rem;
   }
 
-  .visualization {
-    background-color: white;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-  }
+.visualization {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  width: 100%;
+  height: 800px;
+}
 
   @media (max-width: 768px) {
     .stats-container {
