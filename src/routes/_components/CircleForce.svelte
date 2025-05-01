@@ -64,7 +64,7 @@
 
     simulation = forceSimulation(nextNodes)
       .force('x', forceX($width / 2).strength(0.1))
-      .force('y', forceY($height / 2).strength(0.15))
+.force('y', forceY(d => d.self_made ? $height / 3 : ($height * 2) / 3).strength(0.15))
       .force('center', forceCenter($width / 2, $height / 2))
       .force('charge', forceManyBody().strength(manyBodyStrength))
       .force('collision', forceCollide().radius(d => d.r + 2).strength(0.75))
