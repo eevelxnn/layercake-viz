@@ -18,8 +18,8 @@ let height = 3300;
   $: data = raw
     .filter(d => d.year === year && d.avg_net_worth > 0)
 .map((d, i) => ({
-  id: d.full_name,           // 👈 shown in UI
-  key: `${d.full_name}-${i}`,// 👈 internal unique key
+  id: d.full_name,           
+  key: `${d.full_name}-${i}`,
   value: d.avg_net_worth,
   self_made: d.self_made
 }))
@@ -97,7 +97,7 @@ let height = 3300;
 
   <div class="visualization">
     <LayerCake {width} {height} {data}>
-      <CircleForce />
+      <CircleForce/>
     </LayerCake>
   </div>
 </div>
@@ -343,7 +343,6 @@ let height = 3300;
 .arrow-float.right {
   right: 20px;
 }
-
 
 </style>
 

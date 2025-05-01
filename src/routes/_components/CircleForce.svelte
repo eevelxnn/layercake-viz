@@ -13,6 +13,7 @@
 
   const { data, width, height } = getContext('LayerCake');
 
+
   export let valueKey = 'value';
   export let idKey = 'id';
   export let manyBodyStrength = -10;
