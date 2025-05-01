@@ -28,5 +28,5 @@
 
 </style>
 
-<a href="/next" class="arrow-float left" aria-label="Previous page">←</a>
+<a href="/map" class="arrow-float left" aria-label="Previous page">←</a>
 <a href="/" class="arrow-float right" aria-label="Next page">→</a>
