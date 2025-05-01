@@ -1,11 +1,3 @@
-<script>
-  // Add any setup for the next visualization here
-</script>
-
-<h1>Next Visualization</h1>
-<p>This is where your next chart or content will go.</p>
-
-
 
 <style>
 .arrow-float {
@@ -36,5 +28,5 @@
 
 </style>
 
-<a href="/self-made-trend" class="arrow-float left" aria-label="Previous page">←</a>
-<a href="/age-distribution" class="arrow-float right" aria-label="Next page">→</a>
+<a href="/next" class="arrow-float left" aria-label="Previous page">←</a>
+<a href="/" class="arrow-float right" aria-label="Next page">→</a>
