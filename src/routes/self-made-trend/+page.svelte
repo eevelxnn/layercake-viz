@@ -1,7 +1,7 @@
 <script>
   import { LayerCake } from 'layercake';
-  import CircleForce from './_components/CircleForce.svelte';
-  import raw from './_data/billionaires_by_year.json';
+  import CircleForce from '../_components/CircleForce.svelte';
+  import raw from '../_data/billionaires_by_year.json';
   import { format } from 'd3-format';
 
 let width = 3000;
@@ -347,5 +347,5 @@ let height = 3300;
 
 </style>
 
-<a href="/prev" class="arrow-float left" aria-label="Previous page">←</a>
+<a href="/intro" class="arrow-float left" aria-label="Previous page">←</a>
 <a href="/next" class="arrow-float right" aria-label="Next page">→</a>
