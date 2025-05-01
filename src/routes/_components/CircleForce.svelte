@@ -20,7 +20,7 @@
   export let nodeStrokeWidth = 1;
 
   const maxValue = 5000;
-  const rScale = scaleSqrt().domain([0, maxValue]).range([10, 80]);
+  const rScale = scaleSqrt().domain([0, maxValue]).range([5, 80]);
   const formatBillion = format(',.2f');
 
   const getColor = d => d.self_made ? '#69b3a2' : '#ccc';
@@ -67,7 +67,7 @@
       .force('center', forceCenter($width / 2, $height / 2))
       .force('charge', forceManyBody().strength(manyBodyStrength))
       .force('collision', forceCollide().radius(d => d.r + 2).strength(0.75))
-      .alpha(0.2).alphaDecay(0.01)
+      .alpha(0.3).alphaDecay(0.01)
       .restart();
 
     simulation.on('tick', () => {
