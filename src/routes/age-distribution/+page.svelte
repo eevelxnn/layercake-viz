@@ -577,3 +577,5 @@
   right: 20px;
  }
 </style>
+
+<a href="/intro" class="arrow-float right" aria-label="Home">→</a>

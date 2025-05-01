@@ -57,3 +57,5 @@
     <WorldMap {width} {height} />
   </LayerCake>
 </div>
+
+<a href="/industry" class="arrow-float right" aria-label="Next page">→</a>

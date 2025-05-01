@@ -43,7 +43,6 @@
     return row;
   });
 
-  // Calculate total wealth per year
   const yearlyTotals = {};
   cleanData.forEach(row => {
     const total = seriesNames.reduce((sum, k) => sum + (row[k] || 0), 0);
@@ -81,10 +80,13 @@
   }
 </script>
 
-<div class="chart-container">
-  <h2 class="chart-title">Industry Wealth Distribution</h2>
+<div class="container">
+  <header>
+    <h1>Industry Wealth Distribution</h1>
+    <p class="subtitle">How industry composition of billionaire wealth has evolved over time</p>
+  </header>
 
-  <div class="chart-wrapper">
+  <div class="visualization">
     <LayerCake
       padding={{ top: 30, right: 30, bottom: 40, left: 50 }}
       x={d => d.data.year}
@@ -125,30 +127,39 @@
 </div>
 
 <style>
-  .chart-container {
-    width: 100%;
-    height: auto;
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 2rem;
-    background-color: #f5f5f5;
-    font-family: 'Playfair Display', 'Georgia', serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
-  .chart-title {
+  header {
     text-align: center;
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #333;
+    margin-bottom: 2rem;
   }
 
-  .chart-wrapper {
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-top: 0;
+  }
+
+  .visualization {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
     width: 100%;
-    height: 400px;
-    margin-bottom: 2rem;
+    height: 600px;
   }
 
   .chart-legend {
@@ -156,59 +167,44 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 2rem;
   }
 
   .legend-item {
     display: flex;
     align-items: center;
-    margin-right: 1rem;
+    font-size: 0.9rem;
   }
 
   .legend-color {
     display: inline-block;
     width: 16px;
     height: 16px;
-    margin-right: 6px;
-    border-radius: 2px;
-  }
-
-  .legend-label {
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  .chart-title::after {
-    content: '';
-    display: block;
-    width: 100px;
-    height: 1px;
-    background-color: #9c8c61;
-    margin: 1rem auto;
+    border-radius: 50%;
+    margin-right: 8px;
   }
 
   .tooltip {
     position: fixed;
-    background: white;
-    color: black;
-    padding: 6px 10px;
-    font-size: 13px;
-    border: 1px solid #ccc;
+    background-color: white;
+    padding: 0.75rem 1rem;
     border-radius: 6px;
-    pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 0.9rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     z-index: 1000;
-    max-width: 200px;
+    pointer-events: none;
+    max-width: 250px;
   }
 
   @media (max-width: 768px) {
-    .chart-wrapper {
-      height: 300px;
+    .visualization {
+      height: 400px;
     }
 
-    .chart-legend {
-      flex-direction: column;
-      align-items: center;
+    .legend-item {
+      font-size: 0.8rem;
     }
   }
 </style>
+
+<a href="/age" class="arrow-float right" aria-label="Next page">→</a>
