@@ -7,7 +7,7 @@
 
   import raw from '../_data/industry_wealth.json';
 
-  let tooltip = { visible: false, x: 0, y: 0, industry: '', value: 0, year: 0 };
+  let tooltip = { visible: false, x: 0, y: 0, industry: '', value: 0, year: 0, percentage: 0 };
 
   const industryColors = {
     'Manufacturing': '#9c8c61',
@@ -24,23 +24,6 @@
 
   function colorScale(industry) {
     return industryColors[industry] || '#ccc';
-  }
-
-  
-
-  function handleMousemove(event, d) {
-    tooltip = {
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      industry: d.key,
-      value: d[1] - d[0],
-      year: d.data.year
-    };
-  }
-
-  function handleMouseleave() {
-    tooltip.visible = false;
   }
 
   const xKey = 'year';
@@ -60,6 +43,13 @@
     return row;
   });
 
+  // Calculate total wealth per year
+  const yearlyTotals = {};
+  cleanData.forEach(row => {
+    const total = seriesNames.reduce((sum, k) => sum + (row[k] || 0), 0);
+    yearlyTotals[row.year] = total;
+  });
+
   const stackedData = stack(cleanData, seriesNames);
   stackedData.forEach((layer, i) => {
     layer.key = seriesNames[i];
@@ -68,6 +58,27 @@
 
   const flatData = flatten(stackedData);
   const formatBillion = format(',.2f');
+
+  function handleMousemove(event, d) {
+    const year = d.data.year;
+    const value = d[1] - d[0];
+    const total = yearlyTotals[year] || 1;
+    const percentage = (value / total) * 100;
+
+    tooltip = {
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      industry: d.key,
+      value,
+      year,
+      percentage
+    };
+  }
+
+  function handleMouseleave() {
+    tooltip.visible = false;
+  }
 </script>
 
 <div class="chart-container">
@@ -93,56 +104,22 @@
       </Svg>
     </LayerCake>
   </div>
-<div class="chart-legend">
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #9c8c61;"></span>
-    <span class="legend-label">Manufacturing</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #1f77b4;"></span>
-    <span class="legend-label">Technology</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #ff7f0e;"></span>
-    <span class="legend-label">Real Estate</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #2ca02c;"></span>
-    <span class="legend-label">Fashion & Retail</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #d62728;"></span>
-    <span class="legend-label">Diversified</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #9467bd;"></span>
-    <span class="legend-label">Finance & Investments</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #8c564b;"></span>
-    <span class="legend-label">Finance and Investments</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #e377c2;"></span>
-    <span class="legend-label">Healthcare</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #7f7f7f;"></span>
-    <span class="legend-label">Energy</span>
-  </div>
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #bcbd22;"></span>
-    <span class="legend-label">Food and Beverage</span>
-  </div>
-</div>
 
-
+  <div class="chart-legend">
+    {#each Object.keys(industryColors) as industry}
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: {industryColors[industry]};"></span>
+        <span class="legend-label">{industry}</span>
+      </div>
+    {/each}
+  </div>
 
   {#if tooltip.visible}
     <div class="tooltip" style="top: {tooltip.y}px; left: {tooltip.x}px;">
       <strong>{tooltip.industry}</strong><br />
       Year: {tooltip.year}<br />
-      Net Worth: ${formatBillion(tooltip.value)}B
+      Net Worth: ${formatBillion(tooltip.value)}B<br />
+      Share of Total Wealth: {tooltip.percentage.toFixed(1)}%
     </div>
   {/if}
 </div>
