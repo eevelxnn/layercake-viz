@@ -58,4 +58,5 @@
   </LayerCake>
 </div>
 
+<a href="/self-made-trend" class="arrow-float left" aria-label="Previous page">←</a>
 <a href="/industry" class="arrow-float right" aria-label="Next page">→</a>
