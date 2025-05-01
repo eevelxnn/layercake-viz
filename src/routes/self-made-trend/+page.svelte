@@ -347,4 +347,4 @@ let height = 3300;
 </style>
 
 <a href="/intro" class="arrow-float left" aria-label="Previous page">←</a>
-<a href="/map" class="arrow-float right" aria-label="Next page">→</a>
+<a href="/age-distribution" class="arrow-float right" aria-label="Next page">→</a>

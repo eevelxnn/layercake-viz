@@ -104,7 +104,7 @@
   // Set up d3-force simulation
   simulation = forceSimulation(nodes)
     .force('x', forceX(d => xScale(d.age)).strength(0.2))
-    .force('y', forceY(margin.top + innerHeight / 2).strength(0.05))
+    .force('y', forceY(d => d.self_made_count > 0 ? height / 3 : (height * 2) / 3).strength(0.15))
     .force('collide', forceCollide(d => d.r + 1).strength(1))
     .force('charge', forceManyBody().strength(2)) // mild attraction
     .alpha(0.7)
@@ -186,25 +186,7 @@
  {#if isLoading}
   <div class="loading"><p>Loading age distribution data...</p ></div>
  {:else}
-  <div class="controls-container">
-   <div class="year-slider">
-    <div class="year-display">
-     <span>Selected Year: <strong>{selectedYear}</strong></span>
-    </div>
-    <input
-     type="range"
-     min={Math.min(...years)}
-     max={Math.max(...years)}
-     bind:value={selectedYear}
-     on:input={onYear}
-     class="timeline-slider"
-    />
-    <div class="year-labels">
-     <span>{Math.min(...years)}</span>
-     <span>{Math.max(...years)}</span>
-    </div>
-   </div>
-  </div>
+
 
   <div class="stats-cards">
    <div class="stat-card">
@@ -227,6 +209,26 @@
    <div class="stat-card">
     <h3>Total Wealth:</h3>
     <p class="stat-value">{fmtWealth(stats.totalWealth)}B</p >
+   </div>
+  </div>
+
+  <div class="controls-container">
+   <div class="year-slider">
+    <div class="year-display">
+     <span>Selected Year: <strong>{selectedYear}</strong></span>
+    </div>
+    <input
+     type="range"
+     min={Math.min(...years)}
+     max={Math.max(...years)}
+     bind:value={selectedYear}
+     on:input={onYear}
+     class="timeline-slider"
+    />
+    <div class="year-labels">
+     <span>{Math.min(...years)}</span>
+     <span>{Math.max(...years)}</span>
+    </div>
    </div>
   </div>
 
@@ -291,7 +293,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
  }
 
  .page-header {
@@ -300,7 +302,7 @@
  }
 
  h1 {
-  font-family: 'Playfair Display', 'Georgia', serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
   color: #333;
@@ -510,5 +512,5 @@
   right: 20px;
  }
 </style>
-<a href="/industry" class="arrow-float left" aria-label="Previous page">←</a>
-<a href="/intro" class="arrow-float right" aria-label="Home">→</a>
+<a href="/self-made-trend" class="arrow-float left" aria-label="Previous page">←</a>
+<a href="/industry" class="arrow-float right" aria-label="Home">→</a>
