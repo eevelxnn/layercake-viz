@@ -1,6 +1,9 @@
 <script>
   import '../app.css';
   import { onMount } from 'svelte';
+    import { fade } from 'svelte/transition';
+
+  
   
   // Navigation items
   const navItems = [
@@ -81,7 +84,9 @@
     {/each}
   </div>
 
-
+<div in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+  <slot />
+</div>
 
   
   <!-- Main Content -->
@@ -188,25 +193,6 @@
     top: 0;
   }
   
-  /* Header Styles */
-  .app-header {
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  
-  .header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
   
   .logo {
     display: flex;
