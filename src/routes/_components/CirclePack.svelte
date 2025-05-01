@@ -44,31 +44,26 @@
 </script>
 
 <svg {width} {height} class="circle-pack-svg">
-  {#each descendants as d, i (i)}
-    <g transform={`translate(${d.x},${d.y})`}>
-      <circle
-        r={d.r}
-        fill={d.self_made ? "#69b3a2" : "#ccc"}
-        stroke={stroke}
-        stroke-width={strokeWidth}
-      />
-      {#if labelVisibilityThreshold(d.r)}
-        <text
-          text-anchor="middle"
-          dy=".3em"
-          font-size="10"
-          fill={textColor}
-          style="text-shadow:
+	{#each descendants as d, i (i)}
+		<g transform={`translate(${d.x},${d.y})`}>
+			<circle r={d.r} fill={d.self_made ? "#69b3a2" : "#ccc"} {stroke} stroke-width={strokeWidth} />
+			{#if labelVisibilityThreshold(d.r)}
+				<text
+					text-anchor="middle"
+					dy=".3em"
+					font-size="10"
+					fill={textColor}
+					style="text-shadow:
             -{textStrokeWidth}px -{textStrokeWidth}px 0 {textStroke},
             {textStrokeWidth}px -{textStrokeWidth}px 0 {textStroke},
             -{textStrokeWidth}px {textStrokeWidth}px 0 {textStroke},
             {textStrokeWidth}px {textStrokeWidth}px 0 {textStroke};"
-        >
-          {titleCase(d[idKey])}
-        </text>
-      {/if}
-    </g>
-  {/each}
+				>
+					{titleCase(d[idKey])}
+				</text>
+			{/if}
+		</g>
+	{/each}
 </svg>
 
 <style>
