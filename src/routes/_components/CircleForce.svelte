@@ -37,6 +37,7 @@
   let tooltip = null;
   let tooltipX = 0;
   let tooltipY = 0;
+  let hoveredId = null;
 
   function handleMouseMove(event) {
     tooltipX = event.clientX + 12;
@@ -65,8 +66,8 @@
       .force('y', forceY($height / 2).strength(0.15))
       .force('center', forceCenter($width / 2, $height / 2))
       .force('charge', forceManyBody().strength(manyBodyStrength))
-      .force('collision', forceCollide().radius(d => d.r + nodeStrokeWidth / 2).strength(1))
-      .alpha(0.2)
+      .force('collision', forceCollide().radius(d => d.r + 2).strength(0.75))
+      .alpha(0.2).alphaDecay(0.01)
       .restart();
 
     simulation.on('tick', () => {
@@ -84,14 +85,20 @@
     {#each nodes as d (d[idKey])}
       <g
         transform={`translate(${d.x}, ${d.y})`}
-        on:mouseenter={() => (tooltip = d)}
-        on:mouseleave={() => (tooltip = null)}
+        on:mouseenter={() => {
+          tooltip = d;
+          hoveredId = d[idKey];
+        }}
+        on:mouseleave={() => {
+          tooltip = null;
+          hoveredId = null;
+        }}
       >
         <circle
           r={rScale(d[valueKey])}
           fill={getColor(d)}
-          stroke={nodeStroke}
-          stroke-width={nodeStrokeWidth}
+          stroke={hoveredId === d[idKey] ? '#000' : nodeStroke}
+          stroke-width={hoveredId === d[idKey] ? 3 : nodeStrokeWidth}
         />
         {#if rScale(d[valueKey]) > 25}
           <text
