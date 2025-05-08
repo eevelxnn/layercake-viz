@@ -8,7 +8,7 @@
 
 	// Layout and state
 	const margin = { top: 40, right: 30, bottom: 50, left: 60 };
-	let width = 1000;
+	let width = 1100;
 	let height = 600;
 	let years = [];
 	let selectedYear = 2023;
@@ -29,28 +29,47 @@
 	// Formatting
 	const fmtWealth = format('$,.1f');
 
+	// --- normalize raw data keys so that "Finance & Investments" and "Finance and Investments" merge ---
+	const data = raw.map(d => {
+		const nd = { year: d.year, filter: d.filter };
+		Object.entries(d).forEach(([k, v]) => {
+			if (k !== 'year' && k !== 'filter') {
+				// replace ampersands with "and", strip brackets/quotes, collapse spaces
+				const norm = k
+					.replace(/&/g, 'and')
+					.replace(/[\[\]']/g, '')
+					.replace(/\s+/g, ' ')
+					.trim();
+				nd[norm] = (nd[norm] || 0) + v;
+			}
+		});
+		return nd;
+	});
+
 	onMount(() => {
-		years = [...new Set(raw.map(d => d.year))].sort();
+		// Build year list
+		years = [...new Set(data.map(d => d.year))].sort();
 		if (years.length) selectedYear = years[years.length - 1];
 
 		// compute total per industry across years
 		const industryTotals = {};
-		raw.forEach(d => {
+		data.forEach(d => {
 			Object.keys(d).forEach(k => {
 				if (k !== 'year' && k !== 'filter') {
 					industryTotals[k] = (industryTotals[k] || 0) + (d[k] || 0);
 				}
 			});
 		});
+		// pick top 10
 		topIndustries = Object.entries(industryTotals)
 			.sort((a, b) => b[1] - a[1])
 			.slice(0, 10)
 			.map(([k]) => k);
 
+		// assign colors
 		topIndustries.forEach(ind => {
-			const clean = ind.replace(/[\[\]']/g, '').trim();
-			if (!industryColors[clean]) {
-				industryColors[clean] = getRandomColor();
+			if (!industryColors[ind]) {
+				industryColors[ind] = getRandomColor();
 			}
 		});
 
@@ -59,25 +78,24 @@
 	});
 
 	function updateVis() {
-		filtered = raw.filter(d => d.year === selectedYear && d.filter === 'all');
+		filtered = data.filter(d => d.year === selectedYear && d.filter === 'all');
 		let allCircles = [];
 
 		topIndustries.forEach(industry => {
 			const val = filtered[0]?.[industry] || 0;
 			const count = Math.max(1, Math.round(val));
 			for (let j = 0; j < count; j++) {
-				const clean = industry.replace(/[\[\]']/g, '').trim();
 				allCircles.push({
-					industry: clean,
+					industry,
 					value: 1,
-					color: industryColors[clean] || '#ccc',
-					key: `${clean}-${j}`
+					color: industryColors[industry] || '#ccc',
+					key: `${industry}-${j}`
 				});
 			}
 		});
 
 		industryScale = scaleBand()
-			.domain(topIndustries.map(d => d.replace(/[\[\]']/g, '').trim()))
+			.domain(topIndustries)
 			.range([margin.left, width - margin.right])
 			.padding(0.1);
 
@@ -106,7 +124,7 @@
 			.alpha(0.7)
 			.alphaDecay(0.03)
 			.on('tick', () => {
-				// clamp each node's x to its industry's band
+				// clamp x within each industry's band
 				nodes.forEach(d => {
 					const start = industryScale(d.industry);
 					const end = start + industryScale.bandwidth();
@@ -153,8 +171,8 @@
 			{#each topIndustries as industry, i}
 				{#if i > 0}
 					<line
-						x1={industryScale(industry.replace(/[\[\]']/g, '').trim())}
-						x2={industryScale(industry.replace(/[\[\]']/g, '').trim())}
+						x1={industryScale(industry)}
+						x2={industryScale(industry)}
 						y1={margin.top}
 						y2={height - margin.bottom}
 						stroke="#eee"
@@ -164,10 +182,8 @@
 					/>
 				{/if}
 				<line
-					x1={industryScale(industry.replace(/[\[\]']/g, '').trim()) +
-						industryScale.bandwidth() / 2}
-					x2={industryScale(industry.replace(/[\[\]']/g, '').trim()) +
-						industryScale.bandwidth() / 2}
+					x1={industryScale(industry) + industryScale.bandwidth() / 2}
+					x2={industryScale(industry) + industryScale.bandwidth() / 2}
 					y1={margin.top}
 					y2={height - margin.bottom}
 					class="grid-line"
@@ -183,11 +199,8 @@
 	<div class="chart-legend">
 		{#each topIndustries as industry}
 			<div class="legend-item">
-				<span
-					class="legend-color"
-					style="background-color: {industryColors[industry.replace(/[\[\]']/g, '').trim()]}"
-				></span>
-				<span class="legend-label">{industry.replace(/[\[\]']/g, '').trim()}</span>
+				<span class="legend-color" style="background-color: {industryColors[industry]}"></span>
+				<span class="legend-label">{industry}</span>
 			</div>
 		{/each}
 	</div>
@@ -297,13 +310,15 @@
 
 	.chart-legend {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		justify-content: center;
 		gap: 1rem;
 		margin-top: 2rem;
+		overflow-x: auto;
 	}
 
 	.legend-item {
+		flex: 0 0 auto;
 		display: flex;
 		align-items: center;
 		font-size: 0.9rem;
@@ -315,6 +330,16 @@
 		height: 16px;
 		border-radius: 50%;
 		margin-right: 8px;
+	}
+
+	.legend-label {
+		margin-left: 0.5rem;
+		/* allow wrapping inside the label */
+		white-space: normal;
+		word-break: break-word;
+		/* adjust to taste */
+		max-width: 6rem;
+		text-align: center;
 	}
 
 	.tooltip {
