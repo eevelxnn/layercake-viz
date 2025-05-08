@@ -20,21 +20,34 @@
 		const hue = Math.floor(Math.random() * 360);
 		return `hsl(${hue}, 60%, 60%)`;
 	}
+
+	// the nine industries to display stats for:
+	const focusIndustries = [
+		'Technology',
+		'Fashion and Retail',
+		'Finance and Investments',
+		'Diversified',
+		'Manufacturing',
+		'Real Estate',
+		'Energy',
+		'Healthcare',
+		'Food and Beverage'
+	];
+
 	let topIndustries = [];
 	let industryScale, rScale;
 	let filtered = [];
 	let nodes = [];
 	let simulation;
 
-	// Formatting
-	const fmtWealth = format('$,.1f');
+	// per-industry stats
+	let industryStats = [];
 
-	// --- normalize raw data keys so that "Finance & Investments" and "Finance and Investments" merge ---
+	// normalize keys ("&" → "and", strip brackets/quotes)
 	const data = raw.map(d => {
 		const nd = { year: d.year, filter: d.filter };
 		Object.entries(d).forEach(([k, v]) => {
 			if (k !== 'year' && k !== 'filter') {
-				// replace ampersands with "and", strip brackets/quotes, collapse spaces
 				const norm = k
 					.replace(/&/g, 'and')
 					.replace(/[\[\]']/g, '')
@@ -47,11 +60,9 @@
 	});
 
 	onMount(() => {
-		// Build year list
 		years = [...new Set(data.map(d => d.year))].sort();
 		if (years.length) selectedYear = years[years.length - 1];
 
-		// compute total per industry across years
 		const industryTotals = {};
 		data.forEach(d => {
 			Object.keys(d).forEach(k => {
@@ -60,17 +71,13 @@
 				}
 			});
 		});
-		// pick top 10
 		topIndustries = Object.entries(industryTotals)
 			.sort((a, b) => b[1] - a[1])
 			.slice(0, 10)
 			.map(([k]) => k);
 
-		// assign colors
 		topIndustries.forEach(ind => {
-			if (!industryColors[ind]) {
-				industryColors[ind] = getRandomColor();
-			}
+			if (!industryColors[ind]) industryColors[ind] = getRandomColor();
 		});
 
 		updateVis();
@@ -79,8 +86,13 @@
 
 	function updateVis() {
 		filtered = data.filter(d => d.year === selectedYear && d.filter === 'all');
-		let allCircles = [];
 
+		industryStats = focusIndustries.map(ind => {
+			const val = filtered[0]?.[ind] || 0;
+			return { industry: ind, count: Math.max(1, Math.round(val)) };
+		});
+
+		let allCircles = [];
 		topIndustries.forEach(industry => {
 			const val = filtered[0]?.[industry] || 0;
 			const count = Math.max(1, Math.round(val));
@@ -124,10 +136,9 @@
 			.alpha(0.7)
 			.alphaDecay(0.03)
 			.on('tick', () => {
-				// clamp x within each industry's band
 				nodes.forEach(d => {
-					const start = industryScale(d.industry);
-					const end = start + industryScale.bandwidth();
+					const start = industryScale(d.industry),
+						end = start + industryScale.bandwidth();
 					d.x = Math.max(start + d.r, Math.min(end - d.r, d.x));
 				});
 				nodes = [...nodes];
@@ -145,6 +156,17 @@
 		<h1>Industry Wealth Distribution</h1>
 		<p class="subtitle">How industry composition of billionaire wealth has evolved over time</p>
 	</header>
+
+	<!-- show each focus industry's billionaire counts -->
+	<div class="stats-cards">
+		{#each industryStats as s}
+			<div class="stat-card" style="border-top-color: {industryColors[s.industry]};">
+				<h3>{s.industry}</h3>
+				<p class="stat-label">Number of billionaires:</p>
+				<p class="stat-value">{s.count}</p>
+			</div>
+		{/each}
+	</div>
 
 	<div class="controls-container">
 		<div class="year-slider">
@@ -220,7 +242,7 @@
 
 	header {
 		text-align: center;
-		margin-bottom: 2rem;
+		margin-bottom: 1rem;
 	}
 
 	h1 {
@@ -233,6 +255,40 @@
 		font-size: 1.1rem;
 		color: #7f8c8d;
 		margin-top: 0;
+	}
+
+	/* stats cards grid for nine industries */
+	.stats-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 1rem;
+		margin: 1.5rem 0;
+	}
+
+	.stat-card {
+		background-color: rgba(255, 255, 255, 0.9);
+		padding: 1rem 1.5rem;
+		border-radius: 8px;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+		text-align: center;
+		border-top: 4px solid;
+	}
+
+	.stat-card h3 {
+		font-size: 1rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.stat-label {
+		font-size: 0.9rem;
+		color: #666;
+		margin: 0.25rem 0;
+	}
+
+	.stat-value {
+		font-size: 1.6rem;
+		font-weight: bold;
+		margin: 0.25rem 0;
 	}
 
 	.controls-container {
@@ -308,6 +364,11 @@
 		height: 600px;
 	}
 
+	.grid-line {
+		stroke: #eee;
+		stroke-width: 1;
+	}
+
 	.chart-legend {
 		display: flex;
 		flex-wrap: nowrap;
@@ -333,35 +394,10 @@
 	}
 
 	.legend-label {
-		margin-left: 0.5rem;
-		/* allow wrapping inside the label */
 		white-space: normal;
 		word-break: break-word;
-		/* adjust to taste */
 		max-width: 6rem;
 		text-align: center;
-	}
-
-	.tooltip {
-		position: fixed;
-		background-color: white;
-		padding: 0.75rem 1rem;
-		border-radius: 6px;
-		font-size: 0.9rem;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-		z-index: 1000;
-		pointer-events: none;
-		max-width: 250px;
-	}
-
-	@media (max-width: 768px) {
-		.chart-container {
-			height: 400px;
-		}
-
-		.legend-item {
-			font-size: 0.8rem;
-		}
 	}
 
 	.arrow-float {
