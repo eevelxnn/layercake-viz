@@ -1,72 +1,37 @@
-import pandas as pd
-import re
+#!/usr/bin/env python3
+import os
+import csv
 import json
 
-# Load raw data
-input_path = '../routes/_data/all_billionaires_1997_2024.csv'
-output_path = '../routes/_data/country_billionaires.json'
+def main():
+    # ←— absolute path to your CSV
+    csv_path = "/Users/zhanghaiyue/Desktop/Spring 2025/ Introduction to Data Visualization/all_billionaires_1997_2024.csv"
+    # JSON will be written alongside the CSV
+    out_dir = os.path.dirname(csv_path)
+    json_path = os.path.join(out_dir, "billionaires_country.json")
 
-# --- Load DataFrame ---
-df = pd.read_csv(input_path)
+    records = []
+    with open(csv_path, encoding="utf-8", newline="") as f:
+        # if your file really is comma‑separated, default works; 
+        # if it’s tab‑separated, change to: delimiter="\t"
+        reader = csv.DictReader(f)
+        for row in reader:
+            year = row.get("year", "").strip()
+            name = row.get("full_name", "").strip()
+            country = row.get("country_of_citizenship", "").strip()
+            if year and name and country:
+                records.append({
+                    "year": year,
+                    "full_name": name,
+                    "country_of_citizenship": country
+                })
 
-# --- Clean "country_of_citizenship" ---
-df['country_of_citizenship'] = df['country_of_citizenship'].fillna('Unknown').str.strip()
+    # ensure output folder exists (it should)
+    os.makedirs(out_dir, exist_ok=True)
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(records, f, ensure_ascii=False, indent=2)
 
-# Optional: unify synonyms or alternate spellings
-country_corrections = {
-    'United States': 'USA',
-    'United Kingdom': 'UK',
-    'Russian Federation': 'Russia',
-    'Korea, South': 'South Korea'
-}
-df['country_of_citizenship'] = df['country_of_citizenship'].replace(country_corrections)
+    print(f"Wrote {len(records)} records to {json_path}")
 
-# --- Clean "year" ---
-df['year'] = pd.to_numeric(df['year'], errors='coerce').fillna(0).astype(int)
-
-# --- Clean "self_made" ---
-def parse_self_made(val):
-    if isinstance(val, str):
-        val = val.strip().lower()
-        if 'true' in val or 'self' in val:
-            return 1
-        elif 'false' in val or 'inher' in val:
-            return 0
-    elif val is True:
-        return 1
-    elif val is False:
-        return 0
-    return pd.NA
-
-df['self_made'] = df['self_made'].apply(parse_self_made)
-
-# --- Clean "net_worth" ---
-def parse_net_worth(val):
-    if isinstance(val, str):
-        match = re.match(r"([\d.]+)", val.replace(",", ""))
-        if match:
-            return float(match.group(1))
-    elif isinstance(val, (int, float)):
-        return float(val)
-    return None
-
-df['net_worth'] = df['net_worth'].apply(parse_net_worth)
-
-# --- Clean "full_name" fields ---
-df['full_name'] = df['full_name'].fillna(df['first_name'].fillna('') + ' ' + df['last_name'].fillna(''))
-df['full_name'] = df['full_name'].str.title().str.strip()
-df['first_name'] = df['first_name'].str.title().str.strip()
-df['last_name'] = df['last_name'].str.title().str.strip()
-
-# --- Filter out rows with missing/invalid data ---
-df = df[(df['year'] > 0) & (df['country_of_citizenship'].notnull()) & (df['self_made'].notnull()) & (df['net_worth'].notnull()) & (df['full_name'].notnull()) & (df['full_name'].str.strip().ne(''))]
-
-# --- Select and rename columns for output ---
-output_df = df[['year', 'country_of_citizenship', 'self_made', 'net_worth', 'full_name']].rename(columns={
-    'country_of_citizenship': 'country'
-})
-
-# --- Output as JSON ---
-output_records = output_df.to_dict(orient='records')
-with open(output_path, 'w', encoding='utf-8') as f:
-    json.dump(output_records, f, ensure_ascii=False, indent=2)
+if __name__ == "__main__":
+    main()
