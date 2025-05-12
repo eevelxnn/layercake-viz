@@ -10,9 +10,14 @@
 	let width = 1200;
 	let height = 600;
 	let year = 1997;
+	let filter = 'overall'; // 'overall', 'selfmade', or 'inherited'
 
 	let mapFeatures = [];
-	let yearDataMap = {};
+	const dataByFilter = {
+		overall: {},
+		selfmade: {},
+		inherited: {}
+	};
 
 	// tooltip state
 	let showTooltip = false;
@@ -26,15 +31,28 @@
 		countryData.forEach(d => {
 			const y = +d.year;
 			const c = d.country_of_citizenship;
-			yearDataMap[y] = yearDataMap[y] || {};
-			yearDataMap[y][c] = (yearDataMap[y][c] || 0) + 1;
+			const sm = d.self_made;
+
+			// Overall count
+			dataByFilter.overall[y] = dataByFilter.overall[y] || {};
+			dataByFilter.overall[y][c] = (dataByFilter.overall[y][c] || 0) + 1;
+
+			// Self-made
+			if (sm === true) {
+				dataByFilter.selfmade[y] = dataByFilter.selfmade[y] || {};
+				dataByFilter.selfmade[y][c] = (dataByFilter.selfmade[y][c] || 0) + 1;
+			}
+
+			// Inherited
+			if (sm === false) {
+				dataByFilter.inherited[y] = dataByFilter.inherited[y] || {};
+				dataByFilter.inherited[y][c] = (dataByFilter.inherited[y][c] || 0) + 1;
+			}
 		});
 	});
 
-	$: counts = yearDataMap[year] || {};
+	$: counts = dataByFilter[filter][year] || {};
 	$: maxCount = Math.max(...Object.values(counts), 1);
-
-	// light-to-dark purple scale
 	$: colorScale = scaleLinear().domain([0, maxCount]).range(['#f2e5f7', '#9b59b6']);
 
 	function getColor(feature) {
@@ -66,10 +84,9 @@
 <div class="container">
 	<header>
 		<h1>Global Distribution of Billionaires</h1>
-		<p class="subtitle">Use the slider below to explore {year} data</p>
+		<p class="subtitle">Use the slider and filters below to explore {year} data</p>
 	</header>
 
-	<!-- Uniform width controls -->
 	<div class="controls-container">
 		<div class="year-slider">
 			<div class="year-display">
@@ -88,9 +105,20 @@
 				<span>2024</span>
 			</div>
 		</div>
+
+		<div class="filter-buttons">
+			<button on:click={() => (filter = 'overall')} class:selected={filter === 'overall'}
+				>Overall</button
+			>
+			<button on:click={() => (filter = 'selfmade')} class:selected={filter === 'selfmade'}
+				>Self-Made</button
+			>
+			<button on:click={() => (filter = 'inherited')} class:selected={filter === 'inherited'}
+				>Inherited</button
+			>
+		</div>
 	</div>
 
-	<!-- Uniform width map module -->
 	<div class="map-wrapper">
 		<svg {width} {height}>
 			{#if mapFeatures.length}
@@ -139,7 +167,6 @@
 		margin-top: 0;
 	}
 
-	/* uniform module styling */
 	.controls-container,
 	.map-wrapper {
 		width: 1200px;
@@ -150,7 +177,6 @@
 		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 	}
 
-	/* slider styles */
 	.year-slider {
 		display: flex;
 		flex-direction: column;
@@ -195,7 +221,26 @@
 		color: #7f8c8d;
 	}
 
-	/* map styles */
+	.filter-buttons {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+	.filter-buttons button {
+		padding: 0.5rem 1rem;
+		border: 1px solid #ccc;
+		background: #fff;
+		cursor: pointer;
+		border-radius: 4px;
+		font-size: 1rem;
+	}
+	.filter-buttons button.selected {
+		background: #9b59b6;
+		color: #fff;
+		border-color: #9b59b6;
+	}
+
 	svg {
 		width: 100%;
 		height: auto;

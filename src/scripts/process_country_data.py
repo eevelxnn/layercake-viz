@@ -12,21 +12,29 @@ def main():
 
     records = []
     with open(csv_path, encoding="utf-8", newline="") as f:
-        # if your file really is comma‑separated, default works; 
-        # if it’s tab‑separated, change to: delimiter="\t"
         reader = csv.DictReader(f)
         for row in reader:
-            year = row.get("year", "").strip()
-            name = row.get("full_name", "").strip()
+            year    = row.get("year", "").strip()
+            name    = row.get("full_name", "").strip()
             country = row.get("country_of_citizenship", "").strip()
+
+            # Normalize to uppercase and map to True/False/None
+            sm = row.get("self_made", "").strip().upper()
+            if sm == "TRUE":
+                self_made = True
+            elif sm == "FALSE":
+                self_made = False
+            else:
+                self_made = None  # will become JSON null
+
             if year and name and country:
                 records.append({
                     "year": year,
                     "full_name": name,
-                    "country_of_citizenship": country
+                    "country_of_citizenship": country,
+                    "self_made": self_made
                 })
 
-    # ensure output folder exists (it should)
     os.makedirs(out_dir, exist_ok=True)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
