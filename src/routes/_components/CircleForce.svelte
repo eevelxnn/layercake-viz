@@ -46,19 +46,29 @@
   }
 
   $: if ($data.length) {
-    const nextNodes = $data.map(d => {
-      const existing = findExistingNode(d[idKey]);
-      const r = rScale(d[valueKey]);
+const nextNodes = $data.map(d => {
+  const existing = findExistingNode(d[idKey]);
+  const r = rScale(d[valueKey]);
 
-      return existing
-        ? { ...existing, ...d, r }
-        : {
-            ...d,
-            x: Math.random() * $width,
-            y: $height + 100,
-            r
-          };
-    });
+  return existing
+    ? {
+        ...d,
+        r,
+        x: existing.x,
+        y: existing.y,
+        vx: existing.vx || 0,
+        vy: existing.vy || 0
+      }
+    : {
+        ...d,
+        r,
+        x: Math.random() * $width,
+        y: $height + 100,
+        vx: 0,
+        vy: 0
+      };
+});
+
 
     if (simulation) simulation.stop();
 
@@ -83,7 +93,8 @@
 
 <div on:mousemove={handleMouseMove} style="position: relative;">
   <svg {width} {height}>
-{#each nodes as d (d.key)}      <g
+{#each nodes as d (d[idKey])}
+<g
         transform={`translate(${d.x}, ${d.y})`}
         on:mouseenter={() => {
           tooltip = d;
