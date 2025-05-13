@@ -16,12 +16,12 @@ def parse_net_worth(value):
     return np.nan
 
 def main():
-    if not os.path.exists(output_path):
-        print(f"❌ File not found: {output_path}")
+    if not os.path.exists(input_path):
+        print(f"❌ File not found: {input_path}")
         return
 
     # Load CSV
-    df = pd.read_csv(output_path)
+    df = pd.read_csv(input_path)
 
     # Clean net worth
     df['net_worth_clean'] = df['net_worth'].apply(parse_net_worth)

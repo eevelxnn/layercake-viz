@@ -97,8 +97,9 @@ let height = 3300;
 
   <div class="visualization">
     <LayerCake {width} {height} {data}>
-      <CircleForce/>
-    </LayerCake>
+  <CircleForce idKey="key" />
+</LayerCake>
+
   </div>
 </div>
 
