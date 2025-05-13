@@ -9,7 +9,7 @@
 
 	let width = 1200;
 	let height = 600;
-	let year = 1997;
+	let year = 2014;
 	let filter = 'overall'; // 'overall', 'selfmade', or 'inherited'
 
 	let mapFeatures = [];
@@ -94,14 +94,14 @@
 			</div>
 			<input
 				type="range"
-				min="1997"
+				min="2014"
 				max="2024"
 				step="1"
 				bind:value={year}
 				class="timeline-slider"
 			/>
 			<div class="year-labels">
-				<span>1997</span>
+				<span>2014</span>
 				<span>2024</span>
 			</div>
 		</div>

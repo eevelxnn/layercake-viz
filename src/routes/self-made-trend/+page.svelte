@@ -11,7 +11,7 @@ let height = 3300;
   const formatNumber = format(',d');
   const formatPercent = format('.1f');
 
-  let year = 1997; // default year
+  let year = 2014; // default year
   let data = [];
   let stats = { total: 0, selfMade: 0, inherited: 0, selfMadePercent: 0 };
 
