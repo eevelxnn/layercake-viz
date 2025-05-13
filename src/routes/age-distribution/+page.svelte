@@ -286,7 +286,9 @@
 </div>
 
 <a href=" " class="arrow-float left" aria-label="Previous page">←</a >
-<a href="/industry" class="arrow-float right" aria-label="Next page">→</a >
+<a href="/industry" class="arrow-float right" aria-label=
+
+"Next page">→</a >
 
 <style>
  .age-distribution-page {

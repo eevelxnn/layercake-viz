@@ -141,7 +141,7 @@
 	</div>
 
 	<a href="/industry" class="arrow-float left" aria-label="Previous page">←</a>
-	<a href="/intro" class="arrow-float right" aria-label="Next page">→</a>
+	<a href="/conclusions" class="arrow-float right" aria-label="Next page">→</a>
 </div>
 
 <style>
